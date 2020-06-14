@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#
+echo -e "\nTo compile this project these libraries must be installed"
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+echo "    . avr-binutils"
+echo "    . avr-gcc"
+echo "    . avr-libc"
+echo "    . avrdude"
+make -f Makefile.fatbottomedboard
