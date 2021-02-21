@@ -2,6 +2,9 @@ PC98 to USB keyboard protocol converter
 =======================================
 Target MCU is ATMega32u2 but other USB capable AVR will also work.
 
+To initialize keyboard correctly you have to connect keyboard with converter first and then plug them into USB port.
+Otherwise, keyboard may not work.
+
 
 Connector
 ---------
@@ -40,24 +43,31 @@ Frame format: 1-Start bit(Lo), 8-Data bits, Odd-Parity, 1-Stop bit
 
 
 
+Prebilt Firmware
+----------------
+Prebuilt firmware HEX files are available under 'binary' directory.
+
+
+
 Build Firmware
 --------------
-Just use 'make' to bild firmware for TMK PC98 converter.
+Just use 'make' to bild firmware for TMK PC98 converter(ATMega32u2).
 
     $ make clean
     $ make
 
-To flash firmware
+To flash firmware run this command
 
     $ make dfu
 
 then push button on converter to flash firmware.
 
-If you are using ATMega32u4 based board instead of premade TMK PC98 converter(ATMega32u2) use following commands.
+If you are using ATMega32u4 based board use following commands to get firmware HEX file.
 
     $ make -f Makefile.32u4 clean
     $ make -f Makefile.32u4
-    $ make -f Makefile.32u4 dfu
+
+And flash it on your board using specific program method.
 
 
 
@@ -186,5 +196,10 @@ Dboard has LEDs but replys with FA to 9D command but ignore it. The LED indicate
 PC-9801V has no LEDs and doesn't accept LED command. It replys with 9D to 9D command. PC-9801V doesn't accept repeat setting command. It replys with 9C to 9C command.
 
 
-## PC-9801V
+### PC-9801V
 Note that you have to connect this keyboard with converter before plug in USB port. It seems this keyboard requires for host to send any command before starting to send scan code.
+
+
+### Connection order
+Converter doesn't support hotplugging due to limitation of PC-9801 keyboard.
+You will have to plug keyboard into converter during without power first, and then plug them into USB port.
