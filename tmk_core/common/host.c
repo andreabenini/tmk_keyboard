@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "debug.h"
 
 
-#ifdef NKRO_ENABLE
+#if defined(NKRO_ENABLE) || defined(NKRO_6KRO_ENABLE)
 bool keyboard_nkro = true;
 #endif
 
@@ -65,6 +65,11 @@ void host_keyboard_send(report_keyboard_t *report)
 void host_mouse_send(report_mouse_t *report)
 {
     if (!driver) return;
+#ifdef MOUSE_EXT_REPORT
+    // clip and copy to Boot protocol XY
+    report->boot_x = (report->x > 127) ? 127 : ((report->x < -127) ? -127 : report->x);
+    report->boot_y = (report->y > 127) ? 127 : ((report->y < -127) ? -127 : report->y);
+#endif
     (*driver->send_mouse)(report);
 }
 
