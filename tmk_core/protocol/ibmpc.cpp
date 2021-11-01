@@ -92,15 +92,12 @@ int16_t IBMPC::host_send(uint8_t data)
 
     dprintf("w%02X ", data);
 
-    // Not receiving data
-    if (isr_state != 0x8000) dprintf("isr:%04X ", isr_state);
-    while (isr_state != 0x8000) ;
-
-    // Not clock Lo
-    if (!clock_in()) dprintf("c:%u ", wait_clock_hi(1000));
-
-    // Not data Lo
-    if (!data_in()) dprintf("d:%u ", wait_data_hi(1000));
+    // Return when receiving data
+    //if (isr_state & 0x0FFF) {
+    if (isr_state != 0x8000) {
+        dprintf("isr:%04X ", isr_state);
+        return -1;
+    }
 
     int_off();
 
@@ -113,7 +110,7 @@ RETRY:
     data_lo();
     wait_us(200);
     clock_hi();     // [5]p.54 [clock low]>100us [5]p.50
-    WAIT(clock_lo, 10000, 1);   // [5]p.53, -10ms [5]p.50
+    WAIT(clock_lo, 15000, 1);   // [5]p.54 T13M, -10ms [5]p.50
 
     /* Data bit[2-9] */
     for (uint8_t i = 0; i < 8; i++) {
@@ -326,15 +323,39 @@ inline void IBMPC::isr(void)
                     protocol = IBMPC_PROTOCOL_XT_IBM;
                     goto DONE;
                 }
-             }
+            }
             break;
         case 0b00010000:
         case 0b10010000:
         case 0b01010000:
         case 0b11010000:
             // AT-done
-            // TODO: parity check?
             isr_debug = isr_state;
+
+            // Detect AA with parity error for AT/XT Auto-Switching support
+            // https://github.com/tmk/tmk_keyboard/wiki/IBM-PC-Keyboard-Converter#atxt-auto-switching
+            // isr_state: st pr b7 b6   b5 b4 b3 b2 | b1 b0  0 *1    0  0  0  0
+            //            1 '0' 1  0    1  0  1  0  | 1  0   0 *1    0  0  0  0
+            if (isr_state == 0xAA90) {
+                error = IBMPC_ERR_PARITY_AA;
+                goto ERROR;
+            }
+
+            // parit bit check
+            {
+                // isr_state: st pr b7 b6   b5 b4 b3 b2 | b1 b0  0 *1    0  0  0  0
+                uint8_t p = (isr_state & 0x4000) ? 1 : 0;
+                p ^= (isr_state >> 6);
+                while (p & 0xFE) {
+                    p = (p >> 1) ^ (p & 0x01);
+                }
+
+                if (p == 0) {
+                    error = IBMPC_ERR_PARITY;
+                    goto ERROR;
+                }
+            }
+
             // stop bit check
             if (isr_state & 0x8000) {
                 protocol = IBMPC_PROTOCOL_AT;
@@ -373,7 +394,11 @@ DONE:
         // buffer overflow
         error = IBMPC_ERR_FULL;
     }
+    goto END;
 ERROR:
+    // inhibit: Use clock_lo() instead of inhibit() for ISR optimization
+    clock_lo();
+END:
     // clear for next data
     isr_state = 0x8000;
 NEXT:

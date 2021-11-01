@@ -137,7 +137,8 @@ uint16_t IBMPCConverter::read_keyboard_id(void)
     uint16_t id = 0;
     int16_t  code = 0;
 
-    // temporary fix Z-150 AT should response with ID
+    // Z-150 AT doesn't response to ID commnd at all.
+    // https://deskthority.net/viewtopic.php?p=495196#p495196
     if (ibmpc.protocol == IBMPC_PROTOCOL_AT_Z150) return 0xFFFD;
 
     // Disable
@@ -171,10 +172,14 @@ uint8_t IBMPCConverter::process_interface(void)
 
         // when recv error, neither send error nor buffer full
         if (!(ibmpc.error & (IBMPC_ERR_SEND | IBMPC_ERR_FULL))) {
-            // keyboard init again
             if (state == LOOP) {
-                xprintf("[RST] ");
+                // Reset
                 state = ERROR;
+            }
+            if (ibmpc.error == IBMPC_ERR_PARITY_AA) {
+                // AT/XT Auto-Switching support
+                // https://github.com/tmk/tmk_keyboard/wiki/IBM-PC-Keyboard-Converter#atxt-auto-switching
+                state = ERROR_PARITY_AA;
             }
         }
 
@@ -205,15 +210,9 @@ uint8_t IBMPCConverter::process_interface(void)
     switch (state) {
         case INIT:
             xprintf("I%u ", timer_read());
-            keyboard_kind = NONE;
-            keyboard_id = 0x0000;
-            current_protocol = 0;
-
-            matrix_clear();
-
             init_time = timer_read();
-            state = WAIT_SETTLE;
             ibmpc.host_enable();
+            state = WAIT_SETTLE;
             break;
         case WAIT_SETTLE:
             while (ibmpc.host_recv() != -1) ; // read data
@@ -606,8 +605,22 @@ MOUSE_DONE:
                 }
             }
             break;
+        case ERROR_PARITY_AA:
+            {
+                xprintf("P%u ", timer_read());
+                // AT/XT Auto-Switching support: Send Resend command to select AT
+                uint16_t code = ibmpc.host_send(0xFE);
+                if (0xAA == code) {
+                    state = READ_ID;
+                    break;
+                }
+            }
+            // FALL THROUGH
         case ERROR:
-            // something goes wrong
+            xprintf("E%u ", timer_read());
+            // reinit state
+            init();
+            matrix_clear();
             clear_keyboard();
             state = INIT;
             break;
