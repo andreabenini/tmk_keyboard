@@ -149,16 +149,16 @@ const uint8_t PROGMEM unimap_cs1[MATRIX_ROWS][MATRIX_COLS] = {
 const uint8_t PROGMEM unimap_cs2[MATRIX_ROWS][MATRIX_COLS] = {
     { UNIMAP_PAUS,  UNIMAP_F9,    UNIMAP_F7,    UNIMAP_F5,    UNIMAP_F3,    UNIMAP_F1,    UNIMAP_F2,    UNIMAP_F12,     /* 00-07 */
       UNIMAP_F13,   UNIMAP_F10,   UNIMAP_F8,    UNIMAP_F6,    UNIMAP_F4,    UNIMAP_TAB,   UNIMAP_GRV,   UNIMAP_RALT  }, /* 08-0F */
-    { UNIMAP_F14,   UNIMAP_LALT,  UNIMAP_LSHIFT,UNIMAP_KANA,  UNIMAP_LCTL,  UNIMAP_Q,     UNIMAP_1,     UNIMAP_RCTL,    /* 10-17 */
-      UNIMAP_F15,   UNIMAP_LGUI,  UNIMAP_Z,     UNIMAP_S,     UNIMAP_A,     UNIMAP_W,     UNIMAP_2,     UNIMAP_RGUI  }, /* 18-1F */
-    { UNIMAP_F16,   UNIMAP_C,     UNIMAP_X,     UNIMAP_D,     UNIMAP_E,     UNIMAP_4,     UNIMAP_3,     UNIMAP_END,     /* 20-27 */
+    { UNIMAP_F14,   UNIMAP_LALT,  UNIMAP_LSHIFT,UNIMAP_KANA,  UNIMAP_LCTL,  UNIMAP_Q,     UNIMAP_1,     UNIMAP_LGUI,    /* 10-17 */
+      UNIMAP_F15,   UNIMAP_RCTL,  UNIMAP_Z,     UNIMAP_S,     UNIMAP_A,     UNIMAP_W,     UNIMAP_2,     UNIMAP_RGUI  }, /* 18-1F */
+    { UNIMAP_F16,   UNIMAP_C,     UNIMAP_X,     UNIMAP_D,     UNIMAP_E,     UNIMAP_4,     UNIMAP_3,     UNIMAP_APP,     /* 20-27 */
       UNIMAP_F17,   UNIMAP_SPACE, UNIMAP_V,     UNIMAP_F,     UNIMAP_T,     UNIMAP_R,     UNIMAP_5,     UNIMAP_HOME  }, /* 28-2F */
     { UNIMAP_F18,   UNIMAP_N,     UNIMAP_B,     UNIMAP_H,     UNIMAP_G,     UNIMAP_Y,     UNIMAP_6,     UNIMAP_DEL,     /* 30-37 */
       UNIMAP_F19,   UNIMAP_INS,   UNIMAP_M,     UNIMAP_J,     UNIMAP_U,     UNIMAP_7,     UNIMAP_8,     UNIMAP_DOWN  }, /* 38-3F */
     { UNIMAP_F20,   UNIMAP_COMMA, UNIMAP_K,     UNIMAP_I,     UNIMAP_O,     UNIMAP_0,     UNIMAP_9,     UNIMAP_RIGHT,   /* 40-47 */
       UNIMAP_F21,   UNIMAP_DOT,   UNIMAP_SLASH, UNIMAP_L,     UNIMAP_SCOLON,UNIMAP_P,     UNIMAP_MINUS, UNIMAP_UP    }, /* 48-4F */
     { UNIMAP_F22,   UNIMAP_RO,    UNIMAP_QUOTE, UNIMAP_LEFT,  UNIMAP_LBRC,  UNIMAP_EQUAL, UNIMAP_PGDN,  UNIMAP_F23,     /* 50-57 */
-      UNIMAP_CAPS,  UNIMAP_RSHIFT,UNIMAP_ENTER, UNIMAP_RBRC,  UNIMAP_APP,   UNIMAP_BSLASH,UNIMAP_PGUP,  UNIMAP_F24   }, /* 58-5F */
+      UNIMAP_CAPS,  UNIMAP_RSHIFT,UNIMAP_ENTER, UNIMAP_RBRC,  UNIMAP_END,   UNIMAP_BSLASH,UNIMAP_PGUP,  UNIMAP_F24   }, /* 58-5F */
     { UNIMAP_PSLS,  UNIMAP_NUBS,  UNIMAP_PENT,  UNIMAP_PEQL,  UNIMAP_HENK,  UNIMAP_VOLD,  UNIMAP_BSPACE,UNIMAP_MHEN,    /* 60-67 */
       UNIMAP_NUHS,  UNIMAP_P1,    UNIMAP_JYEN,  UNIMAP_P4,    UNIMAP_P7,    UNIMAP_PCMM,  UNIMAP_VOLU,  UNIMAP_MUTE  }, /* 68-6F */
     { UNIMAP_P0,    UNIMAP_PDOT,  UNIMAP_P2,    UNIMAP_P5,    UNIMAP_P6,    UNIMAP_P8,    UNIMAP_ESC,   UNIMAP_NLCK,    /* 70-77 */
@@ -182,7 +182,7 @@ const uint8_t PROGMEM unimap_cs2[MATRIX_ROWS][MATRIX_COLS] = {
  * |-------| |-----------------------------------------------------------| ,-----------. |---------------|
  * |PrS|App| |Shif|  \|  Z|  X|  C|  V|  B|  N|  M|  ,|  ,|  /| RO| Shift| |Lef|Hom|Rig| |  1|  2|  3|Ent|
  * |-------| |-----------------------------------------------------------| `-----------' |-----------|---|
- * |Gui|Gui| |Ctrl|    |Alt |          Space              |Alt |    |Ctrl| | RO|Dow|KAN| |  ,|  0|  .|  =|
+ * |Gui|Gui| |Ctrl|    | Alt | P,  |  Space  | P=  | KANA| Alt |    |Ctrl| | RO|Dow|KAN| |  ,|  0|  .|  =|
  * `-------' `----'    `---------------------------------------'    `----'  ---`---'---  `---------------'
  *
  *               ,-----------------------------------------------.
@@ -191,18 +191,18 @@ const uint8_t PROGMEM unimap_cs2[MATRIX_ROWS][MATRIX_COLS] = {
  *               | 07| 0F| 17| 1F| 27| 2F| 37| 3F| 47| 4F| 56| 5E|
  *               `-----------------------------------------------'
  * ,-------. ,-----------------------------------------------------------. ,-----------. ,---------------.
- * | 05| 06| | 0E| 16| 1E| 26| 25| 2E| 36| 3D| 3E| 46| 45| 4E| 55| 5D| 66| | 67| 6E| 6F| | 76| 77| 7E|*84|
+ * | 05| 06| | 0E| 16| 1E| 26| 25| 2E| 36| 3D| 3E| 46| 45| 4E| 55| 5D| 66| | 67| 6E| 6F| | 76| 77| 7E| 84|
  * |-------| |-----------------------------------------------------------| |-----------| |---------------|
  * | 04| 0C| | 0D  | 15| 1D| 24| 2D| 2C| 35| 3C| 43| 44| 4D| 54| 5B|  5C | | 64| 65| 6D| | 6C| 75| 7D| 7C|
  * |-------| |-----------------------------------------------------------| `-----------' |---------------|
  * | 03| 0B| | 14   | 1C| 1B| 23| 2B| 34| 33| 3B| 42| 4B| 4C| 52| 53| 5A | |-26| 63|-25| | 6B| 73| 74| 7B|
  * |-------| |-----------------------------------------------------------| ,-----------. |---------------|
- * |*83| 0A| | 12 | 13| 1A| 22| 21| 2A| 32| 31| 3A| 41| 49| 4A| 51|  59  | | 61| 62| 6A| | 69| 72| 7A| 79|
+ * | 83| 0A| | 12 | 13| 1A| 22| 21| 2A| 32| 31| 3A| 41| 49| 4A| 51|  59  | | 61| 62| 6A| | 69| 72| 7A| 79|
  * |-------| |-----------------------------------------------------------| `-----------' |---------------|
- * | 01| 09| | 11  |   |19  |        29                   |39  |   | 58  | |-16| 60|-1E| | 68| 70| 71| 78|
+ * | 01| 09| | 11  |   | 19  | ^85 |   29    | ^86 |  87 | 39  |   | 58  | |-16| 60|-1E| | 68| 70| 71| 78|
  * `-------' `-----'   `---------------------------------------'   `-----'  ---`---'---  `---------------'
- * *: Special codes remapped 83->02, 84->7F
  * -: G80-2551 specific 80-prefixed codes remapped: 26->5D, 25->53, 16->51, 1E->00
+ * ^: 5576-001 Japanese keys
  * 51, 5C, 5D, 68, 78: Hidden keys in IBM 122-key terminal keyboard [7]
  */
 const uint8_t PROGMEM unimap_cs3[MATRIX_ROWS][MATRIX_COLS] = {
