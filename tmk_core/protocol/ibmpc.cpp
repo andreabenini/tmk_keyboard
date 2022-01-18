@@ -154,6 +154,7 @@ ERROR:
         goto RETRY;
     }
 
+    isr_debug = isr_state;
     error |= IBMPC_ERR_SEND;
     inhibit();
     wait_ms(2);
@@ -217,7 +218,7 @@ inline void IBMPC::isr(void)
         timer_start = t;
     } else {
         // This gives 2.0ms at least before timeout
-        if ((uint8_t)(t - timer_start) >= 3) {
+        if ((uint8_t)(t - timer_start) >= 5) {
             isr_debug = isr_state;
             error = IBMPC_ERR_TIMEOUT;
             goto ERROR;
