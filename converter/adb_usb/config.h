@@ -40,7 +40,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define LOCKING_RESYNC_ENABLE
 
 // Mouse Extended Report
-#define MOUSE_EXT_REPORT
+//#define MOUSE_EXT_REPORT
+
+// Second button in Apple Classic Mouse protocol is ignored as Mac OS9 and OSX does.
+// Without this some of 2-button mouses are unusable.
+// https://github.com/tmk/tmk_keyboard/issues/724
+#define ADB_MOUSE_2ND_BUTTON_QUIRK
+
+// Scan unsupported devices with register0 when SRQ is asserted
+#define ADB_SRQ_SCAN_REG0
 
 
 /* ADB port setting */
@@ -48,7 +56,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define ADB_PIN         PIND
 #define ADB_DDR         DDRD
 #define ADB_DATA_BIT    0
-//#define ADB_PSW_BIT     1       // optional
+#define ADB_PSW_BIT     1
 
 /* key combination for command */
 #ifndef __ASSEMBLER__
