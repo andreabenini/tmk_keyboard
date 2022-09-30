@@ -19,3 +19,6 @@ License
 **GPLv2** or later. Some protocol files are under **Modified BSD License**.
 
 Third party libraries like LUFA, PJRC and V-USB have their own license respectively.
+
+
+Modded for QMK too
