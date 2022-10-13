@@ -52,7 +52,7 @@ $(function() {
             for (var col in keymap[row]) {
                 var code = keymap[row][col];
                 var act = new Action(code);
-                $("#key-" + parseInt(row).toString(32) + parseInt(col).toString(32))
+                $("*#key-" + parseInt(row).toString(32) + parseInt(col).toString(32))
                     .text(act.name)
                     .attr({ title: act.desc });
             }
@@ -100,11 +100,11 @@ $(function() {
 
         // set text and tooltip to key button under editing
         var act = new Action(code);
-        $("#" + editing_key).text(act.name);
-        $("#" + editing_key).attr({ title: act.desc });
+        $("*#" + editing_key).text(act.name);
+        $("*#" + editing_key).attr({ title: act.desc });
 
         // to give back focus on editing_key for moving to next key with Tab
-        $("#" + editing_key).focus();
+        $("*#" + editing_key).focus();
     };
 
 
@@ -155,6 +155,11 @@ $(function() {
                 .attr({ value: code, title: on_codes[code].desc })
                 .text(on_codes[code].name));
     }
+    for (var ids in command_ids) {
+        $("#command_ids_dropdown").append($("<option></option>")
+                .attr({ value: ids, title: command_ids[ids].desc })
+                .text(command_ids[ids].name));
+    }
     $(window).load(function() { action_editor_set_code(0); });
 
     // set code to editor
@@ -170,6 +175,8 @@ $(function() {
         $("#layer_dropdown").val(act.layer_tap_val);
         $("#layer_mods_dropdown").val(act.layer_tap_code & 0x1f);
         $("#layer_on_dropdown").val(act.layer_bitop_op);
+        $("#command_ids_dropdown").val(act.command_id);
+        $("#code_hex").val(('000' + code.toString(16)).substr(-4).toUpperCase());
     };
 
     // compile action code from editor
@@ -183,6 +190,7 @@ $(function() {
         var layer = parseInt($("#layer_dropdown").val());
         var layer_mods = parseInt($("#layer_mods_dropdown").val());
         var layer_on =  parseInt($("#layer_on_dropdown").val());
+        var command_id = parseInt($("#command_ids_dropdown").val());
         switch (action_kind) {
             case "KEY":
                 return kind_codes[action_kind] | keycode;
@@ -222,6 +230,9 @@ $(function() {
                 return kind_codes[action_kind] | (layer/4)<<5 | 1<<(layer%4);
             case "LAYER_CLEAR":
                 return kind_codes[action_kind] | layer_on<<8 | 0<<5 | 0;
+
+            case "COMMAND":
+                return kind_codes[action_kind] | command_id;
         };
         return 0;
     };
@@ -288,6 +299,9 @@ $(function() {
             case "LAYER_CLEAR":
                 $("#layer_on_dropdown").show();
                 break;
+            case "COMMAND":
+                $("#command_ids_dropdown").show();
+                break;
         };
     });
 
@@ -343,8 +357,10 @@ $(function() {
             $("#firmware-dropdown").prop("disabled", false);
 
             if (CONFIG.keymap[v].layout) {
+                $("#keymap-desc").text(CONFIG.keymap[v].desc);
                 layout_load(CONFIG.keymap[v].layout);
             } else {
+                $("#keymap-desc").text("Unknown");
                 layout_load(CONFIG.layout_default);
             }
         });
@@ -482,22 +498,22 @@ $(function() {
         var hash = url_encode_keymap({ keymaps: keymaps });
         var editor_url = document.location.origin + document.location.pathname + document.location.search;
 
-        // goo.gl URL shortener
-        GOOGLE_API_KEY = "AIzaSyCGb3QgZsj96VrtkBJVUkgnEAKQMZ5lYtA";
+        // Don't compromise this token :D
+        BITLY_TOKEN = "fe1d845c97a9ee8872333eb531b07b64c14829ce";
         $.ajax({
             method: "POST",
-            url: "https://www.googleapis.com/urlshortener/v1/url?key=" + GOOGLE_API_KEY,
-            contentType: "application/json; charset=utf-8",
-            data: '{ longUrl: "' + editor_url + '#' + hash + '" }'
+            url: "https://api-ssl.bitly.com/v4/shorten",
+            contentType: "application/json",
+            data: '{ "long_url": "' + editor_url + '#' + hash + '" }',
+            headers:  { Authorization: "Bearer " + BITLY_TOKEN }
         }).done(function(d) {
+            console.log(d);
             $("#share-url-display").show();
-            $("#share-url").text(d.id);
+            $("#share-url").text(d.link);
         }).fail(function(d) {
             console.log(d);
-            console.log('{ longUrl: "' + editor_url + '#' + hash + '" }');
+            console.log('{ long_url: "' + editor_url + '#' + hash + '" }');
         });
-        //window.open("https://bitly.com/shorten/?url=" + encodeURIComponent(editor_url + "#" + hash));
-        //window.open("http://tinyurl.com/create.php?url=" + encodeURIComponent(editor_url + "#" + hash));
     });
 
 
@@ -572,7 +588,7 @@ $(function() {
 
                 // grey-out key to indicate being under editing
                 $(".key").removeClass("key-editing");
-                $(this).addClass("key-editing");
+                $("*#" + editing_key).addClass("key-editing");
                 var pos = get_pos(editing_key);
                 var code = keymaps[editing_layer][pos.row][pos.col];
 
@@ -602,9 +618,11 @@ $(function() {
             $("#firmware-download").prop("disabled", true);
             $("#keymap-load").prop("disabled", true);
         }).always(function() {
+            $("#keymap-desc").text(CONFIG.keymap[variant].desc);
             layout_load(layout);
         });
     } else {
+        $("#keymap-desc").text("Unknown");
         layout_load(layout);
     }
 });

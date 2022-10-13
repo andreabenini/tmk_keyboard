@@ -2,10 +2,10 @@
 <html>
 <head>
     <title>TMK Keymap Editor</title>
-    <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="../common/keymap_editor.css" type="text/css">
-    <script src="http://code.jquery.com/jquery-1.12.3.js"></script>
-    <script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <!-- lz-string-1.3.3.js: LZString.decompress() runs away if given short string. -->
     <script src="../common/lz-string-1.0.2.js"></script>
     <script src="../common/base64.js"></script>
@@ -18,7 +18,7 @@
 <body>
 <h1 id="page-title">TMK Keymap Editor</h1>
 
-<h2>Universal Actionmap(unimap)</h2>
+<h2 id="keymap-desc">Unknown</h2>
 <div id="keyboard-pane" class="keyboard-pane">
     <form>
         <div id="layer_radio">
@@ -134,10 +134,6 @@
         <button class="action" id="code-230" title="RALT">RALT</button>
         <button class="action" id="code-231" title="RGUI">RGUI</button>
         <br/>
-        <p>
-        See <a href="https://github.com/tmk/tmk_keyboard/blob/master/tmk_core/doc/keymap.md" target="_blank">this</a> for detailed description of keymap.<br>
-        See <a href="https://github.com/tmk/tmk_keyboard/blob/master/tmk_core/doc/keymap.md#02-layer-precedence-and-transparency" target="_blank">this</a> for TRNS.<br>
-        </p>
     </div>
 
     <!-- Function and Navigation -->
@@ -260,7 +256,7 @@
         <button class="action" id="code-0x44B6"></button>
         <button class="action" id="code-0x44B7"></button>
         <button class="action" id="code-0x44CD"></button>
-        <button class="action" id="code-0x4483"></button>
+        <button class="action" id="code-0x4183"></button>
         <button class="action" id="code-0x44CC"></button>
         <button class="action" id="code-0x44B3"></button>
         <button class="action" id="code-0x44B4"></button>
@@ -347,27 +343,33 @@
         <button class="action" id="code-0xa6f0"></button>
         <button class="action" id="code-0xa7f0"></button>
         <br>
-        <p>
-        See <a href="https://github.com/tmk/tmk_keyboard/blob/master/tmk_core/doc/keymap.md#3-layer-switching-example" target="_blank">this</a> for detail of Layer Switching.<br>
-        See <a href="https://github.com/tmk/tmk_keyboard/blob/master/tmk_core/doc/keymap.md#41-tap-key" target="_blank">this</a> for Tap key(Dual-role Modifier).<br>
-        See <a href="https://github.com/tmk/tmk_keyboard/blob/master/tmk_core/doc/keymap.md#43-oneshot-modifier" target="_blank">this</a> for OneShot Modifier.<br>
-        </p>
+        <br>
+        Built-in Commands:<br>
+        Bootloader: <button class="action" id="code-0xE000"></button>
     </div>
 
     <!-- Code Editor -->
     <div id="tabs-editor">
         <select id="kind_dropdown"></select>
-        <select id="keycodes_dropdown" class="editor_dropdown"></select>
         <select id="key_mods_dropdown" class="editor_dropdown"></select>
-        <select id="system_codes_dropdown" class="editor_dropdown"></select>
-        <select id="consumer_codes_dropdown" class="editor_dropdown"></select>
-        <select id="mousekey_codes_dropdown" class="editor_dropdown"></select>
+        <select id="keycodes_dropdown" class="editor_dropdown"></select>
         <select id="layer_dropdown" class="editor_dropdown"></select>
         <select id="layer_mods_dropdown" class="editor_dropdown"></select>
         <select id="layer_on_dropdown" class="editor_dropdown"></select>
+        <select id="system_codes_dropdown" class="editor_dropdown"></select>
+        <select id="consumer_codes_dropdown" class="editor_dropdown"></select>
+        <select id="mousekey_codes_dropdown" class="editor_dropdown"></select>
+        <select id="command_ids_dropdown" class="editor_dropdown"></select>
         <button class="action-apply" id="action-apply">Action Apply</button>
+        <br>
+        <br>
+        Code(hex): <input id="code_hex" size="4" />
     </div>
 </div>
+<p>
+See TMK wiki for <a href="https://github.com/tmk/tmk_keyboard/wiki#keymap" target="_blank">Keymap details</a> and
+<a href="https://github.com/tmk/tmk_keyboard/wiki/Keymap-Editor" target="_blank">Keymap Editor usage</a>.<br>
+</p>
 
 <h3>Firmware Hex File Download:</h3>
 <button id="firmware-download" title="save file">Download</button>

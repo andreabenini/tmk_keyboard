@@ -96,6 +96,7 @@ var kind_codes = {
     LAYER_BIT_XOR:      ACT_LAYER<<12 | OP_BIT_XOR<<10,
     LAYER_BIT_SET:      ACT_LAYER<<12 | OP_BIT_SET<<10,
     DEFAULT_LAYER_SET:  ACT_LAYER<<12 | OP_BIT_SET<<10 | ON_SPECIAL_USE<<8,
+    COMMAND:            ACT_COMMAND<<12,
     UNKNOWN:            0,
 };
 
@@ -161,6 +162,11 @@ function Action(code) {
     });
     // ACT_MOUSEKEY
     Object.defineProperty(this, "mousekey_code", {
+        set: function(val)  { this.code |= (val & 0xff); },
+        get: function()     { return (this.code & 0x00ff); }
+    });
+    // ACT_COMMAND
+    Object.defineProperty(this, "command_id", {
         set: function(val)  { this.code |= (val & 0xff); },
         get: function()     { return (this.code & 0x00ff); }
     });
@@ -242,7 +248,7 @@ function Action(code) {
                             return $.extend({}, action_kinds.LAYER_TOGGLE,
                                     {
                                         name: "T" + _layer,
-                                        desc: "Toggle on Layer " + _layer
+                                        desc: "Toggle on/off Layer " + _layer
                                     });
                         }
                         return action_kinds.LAYER_BIT_XOR;
@@ -260,13 +266,13 @@ function Action(code) {
                         return $.extend({}, action_kinds.LAYER_TAP_TOGGLE,
                                 {
                                     name: "Lt" + this.layer_tap_val,
-                                    desc: "Switch Layer " + this.layer_tap_val + " with Tap toggle"
+                                    desc: "Turn on Layer " + this.layer_tap_val + " with Tap toggle"
                                 });
                     case OP_ON_OFF:
                         return $.extend({}, action_kinds.LAYER_MOMENTARY,
                                 {
                                     name: "L" + this.layer_tap_val,
-                                    desc: "Change to Layer " + this.layer_tap_val + "(Momentary)"
+                                    desc: "Turn on Layer " + this.layer_tap_val + "while pressing"
                                 });
                     case OP_OFF_ON:
                         return action_kinds.LAYER_OFF_ON;
@@ -279,14 +285,14 @@ function Action(code) {
                             return $.extend({}, action_kinds.LAYER_MODS,
                                     {
                                         name: "LM" + this.layer_tap_val + " " + _mods_str.name,
-                                        desc: "Change to Layer " + this.layer_tap_val + " with " + _mods_str.desc
+                                        desc: "Turn on Layer " + this.layer_tap_val + " with " + _mods_str.desc
                                     });
                         }
                         else {
                             return $.extend({}, action_kinds.LAYER_TAP_KEY,
                                     {
                                         name: "LT" + this.layer_tap_val + " " + keycodes[this.layer_tap_code].name,
-                                        desc: "Change to Layer " + this.layer_tap_val + " and " + keycodes[this.layer_tap_code].name + "(tap)"
+                                        desc: "Turn on Layer " + this.layer_tap_val + " and " + keycodes[this.layer_tap_code].name + "(tap)"
                                     });
                         }
                 }
@@ -315,6 +321,14 @@ function Action(code) {
                             {
                                 name: mousekey_codes[this.mousekey_code].name,
                                 desc: mousekey_codes[this.mousekey_code].desc
+                            });
+                break;
+            case ACT_COMMAND:
+                if (command_ids[this.command_id])
+                    return $.extend({}, action_kinds.COMMAND,
+                            {
+                                name: command_ids[this.command_id].name,
+                                desc: command_ids[this.command_id].desc
                             });
                 break;
         };
@@ -348,9 +362,9 @@ function Action(code) {
 var action_kinds = {
     KEY:                { id: "KEY",                    name: "ACTION_KEY",                 desc: "Normal key" },
     MODS_KEY:           { id: "MODS_KEY",               name: "ACTION_MODS_KEY",            desc: "Modified key" },
-    MODS_TAP_KEY:       { id: "MODS_TAP_KEY",           name: "ACTION_MODS_TAP_KEY",        desc: "Tap key / Hold modifiers" },
+    MODS_TAP_KEY:       { id: "MODS_TAP_KEY",           name: "ACTION_MODS_TAP_KEY",        desc: "Modifiers on hold and a type a key on tap" },
     MODS_ONESHOT:       { id: "MODS_ONESHOT",           name: "ACTION_MODS_ONESHOT",        desc: "Oneshot modifiers" },
-    MODS_TAP_TOGGLE:    { id: "MODS_TAP_TOGGLE",        name: "ACTION_MODS_TAP_TOGGLE",     desc: "Tap toggle modifiers" },
+    MODS_TAP_TOGGLE:    { id: "MODS_TAP_TOGGLE",        name: "ACTION_MODS_TAP_TOGGLE",     desc: "Modifiers and tap toggle" },
     USAGE_SYSTEM:       { id: "USAGE_SYSTEM",           name: "ACTION_USAGE_SYSTEM",        desc: "System control key" },
     USAGE_CONSUMER:     { id: "USAGE_CONSUMER",         name: "ACTION_USAGE_CONSUMER",      desc: "Consumer key" },
     MOUSEKEY:           { id: "MOUSEKEY",               name: "ACTION_MOUSEKEY",            desc: "Mouse key" },
@@ -360,24 +374,25 @@ var action_kinds = {
     FUNCTION:           { id: "FUNCTION",               name: "ACTION_FUNCTION",            desc: "Function" },
     FUNCTION_TAP:       { id: "FUNCTION_TAP",           name: "ACTION_FUNCTION_TAP",        desc: "Function for tap key" },
     FUNCTION_OPT:       { id: "FUNCTION_OPT",           name: "ACTION_FUNCTION_OPT",        desc: "Function with option" },
-    LAYER_CLEAR:        { id: "LAYER_CLEAR",            name: "ACTION_LAYER_CLEAR",         desc: "Clear all layer state" },
-    LAYER_MOMENTARY:    { id: "LAYER_MOMENTARY",        name: "ACTION_LAYER_MOMENTARY",     desc: "Momentary layer switch" },
-    LAYER_TOGGLE:       { id: "LAYER_TOGGLE",           name: "ACTION_LAYER_TOGGLE",        desc: "Toggle a layer" },
-    LAYER_INVERT:       { id: "LAYER_INVERT",           name: "ACTION_LAYER_INVERT",        desc: "Invert a layer" },
+    LAYER_CLEAR:        { id: "LAYER_CLEAR",            name: "ACTION_LAYER_CLEAR",         desc: "Trun off all layers" },
+    LAYER_MOMENTARY:    { id: "LAYER_MOMENTARY",        name: "ACTION_LAYER_MOMENTARY",     desc: "Turn on a layer while pressing" },
+    LAYER_TOGGLE:       { id: "LAYER_TOGGLE",           name: "ACTION_LAYER_TOGGLE",        desc: "Toggle a layer between on and off" },
+    LAYER_INVERT:       { id: "LAYER_INVERT",           name: "ACTION_LAYER_INVERT",        desc: "Invert state of a layer" },
     LAYER_ON:           { id: "LAYER_ON",               name: "ACTION_LAYER_ON",            desc: "Turn on a layer" },
     LAYER_OFF:          { id: "LAYER_OFF",              name: "ACTION_LAYER_OFF",           desc: "Turn off a layer" },
-    LAYER_SET:          { id: "LAYER_SET",              name: "ACTION_LAYER_SET",           desc: "Set a layer" },
-    LAYER_ON_OFF:       { id: "LAYER_ON_OFF",           name: "ACTION_LAYER_ON_OFF",        desc: "Turn on with press and off with release" },
-    LAYER_OFF_ON:       { id: "LAYER_OFF_ON",           name: "ACTION_LAYER_OFF_ON",        desc: "Turn off with press and on with release" },
-    LAYER_SET_CLEAR:    { id: "LAYER_SET_CLEAR",        name: "ACTION_LAYER_SET_CLEAR",     desc: "Turn on only a layer with press clear with release" },
-    LAYER_MODS:         { id: "LAYER_MODS",             name: "ACTION_LAYER_MODS",          desc: "Momentary layer switch with modifiers" },
-    LAYER_TAP_KEY:      { id: "LAYER_TAP_KEY",          name: "ACTION_LAYER_TAP_KEY",       desc: "Momentary layer switch / Tap key" },
-    LAYER_TAP_TOGGLE:   { id: "LAYER_TAP_TOGGLE",       name: "ACTION_LAYER_TAP_TOGGLE",    desc: "Momentary layer switch / Tap toggle" },
+    LAYER_SET:          { id: "LAYER_SET",              name: "ACTION_LAYER_SET",           desc: "Turn on a layer solely" },
+    LAYER_ON_OFF:       { id: "LAYER_ON_OFF",           name: "ACTION_LAYER_ON_OFF",        desc: "Turn on a layer, then off" },
+    LAYER_OFF_ON:       { id: "LAYER_OFF_ON",           name: "ACTION_LAYER_OFF_ON",        desc: "Turn off a layer, then on" },
+    LAYER_SET_CLEAR:    { id: "LAYER_SET_CLEAR",        name: "ACTION_LAYER_SET_CLEAR",     desc: "Turn on a layer solely, then off all layers" },
+    LAYER_MODS:         { id: "LAYER_MODS",             name: "ACTION_LAYER_MODS",          desc: "Turn on a layer with modifiers" },
+    LAYER_TAP_KEY:      { id: "LAYER_TAP_KEY",          name: "ACTION_LAYER_TAP_KEY",       desc: "Turn on a layer on hold and type a key on tap" },
+    LAYER_TAP_TOGGLE:   { id: "LAYER_TAP_TOGGLE",       name: "ACTION_LAYER_TAP_TOGGLE",    desc: "Turn on a layer on hold and tap toggle" },
     LAYER_BIT_AND:      { id: "LAYER_BIT_AND",          name: "ACTION_LAYER_BIT_AND",       desc: "Layer Bit AND" },
     LAYER_BIT_OR:       { id: "LAYER_BIT_OR",           name: "ACTION_LAYER_BIT_OR",        desc: "Layer Bit OR" },
     LAYER_BIT_XOR:      { id: "LAYER_BIT_XOR",          name: "ACTION_LAYER_BIT_XOR",       desc: "Layer Bit XOR" },
     LAYER_BIT_SET:      { id: "LAYER_BIT_SET",          name: "ACTION_LAYER_BIT_SET",       desc: "Layer Bit SET" },
     DEFAULT_LAYER_SET:  { id: "DEFAULT_LAYER_SET",      name: "ACTION_DEFAULT_LAYER_SET",   desc: "Set a default layer" },
+    COMMAND:            { id: "COMMAND",                name: "ACTION_COMMAND",             desc: "Built-in Command" },
     UNKNOWN:            { id: "UNKNOWN",                name: "ACTION_UNKNOWN",             desc: "Unknown action" },
 };
 
@@ -553,17 +568,7 @@ keycodes[0x00A1] = {id: 'OPER',                        name: 'OPER',            
 keycodes[0x00A2] = {id: 'CLEAR_AGAIN',                 name: 'CLEAR_AGAIN',                 desc: 'CLEAR_AGAIN'};
 keycodes[0x00A3] = {id: 'CRSEL',                       name: 'CRSEL',                       desc: 'CRSEL'};
 keycodes[0x00A4] = {id: 'EXSEL',                       name: 'EXSEL',                       desc: 'EXSEL'};
-keycodes[0x00A5] = {id: 'RESERVED-165',                name: 'RESERVED-165',                desc: 'RESERVED-165(0xA5)'};
-keycodes[0x00A6] = {id: 'RESERVED-166',                name: 'RESERVED-166',                desc: 'RESERVED-166(0xA6)'};
-keycodes[0x00A7] = {id: 'RESERVED-167',                name: 'RESERVED-167',                desc: 'RESERVED-167(0xA7)'};
-keycodes[0x00A8] = {id: 'RESERVED-168',                name: 'RESERVED-168',                desc: 'RESERVED-168(0xA8)'};
-keycodes[0x00A9] = {id: 'RESERVED-169',                name: 'RESERVED-169',                desc: 'RESERVED-169(0xA9)'};
-keycodes[0x00AA] = {id: 'RESERVED-170',                name: 'RESERVED-170',                desc: 'RESERVED-170(0xAA)'};
-keycodes[0x00AB] = {id: 'RESERVED-171',                name: 'RESERVED-171',                desc: 'RESERVED-171(0xAB)'};
-keycodes[0x00AC] = {id: 'RESERVED-172',                name: 'RESERVED-172',                desc: 'RESERVED-172(0xAC)'};
-keycodes[0x00AD] = {id: 'RESERVED-173',                name: 'RESERVED-173',                desc: 'RESERVED-173(0xAD)'};
-keycodes[0x00AE] = {id: 'RESERVED-174',                name: 'RESERVED-174',                desc: 'RESERVED-174(0xAE)'};
-keycodes[0x00AF] = {id: 'RESERVED-175',                name: 'RESERVED-175',                desc: 'RESERVED-175(0xAF)'};
+/*
 keycodes[0x00B0] = {id: 'KP_00',                       name: 'KP_00',                       desc: 'KP_00'};
 keycodes[0x00B1] = {id: 'KP_000',                      name: 'KP_000',                      desc: 'KP_000'};
 keycodes[0x00B2] = {id: 'THOUSANDS_SEPARATOR',         name: 'THOUSANDS_SEPARATOR',         desc: 'THOUSANDS_SEPARATOR'};
@@ -610,8 +615,69 @@ keycodes[0x00DA] = {id: 'KP_BINARY',                   name: 'KP_BINARY',       
 keycodes[0x00DB] = {id: 'KP_OCTAL',                    name: 'KP_OCTAL',                    desc: 'KP_OCTAL'};
 keycodes[0x00DC] = {id: 'KP_DECIMAL',                  name: 'KP_DECIMAL',                  desc: 'KP_DECIMAL'};
 keycodes[0x00DD] = {id: 'KP_HEXADECIMAL',              name: 'KP_HEXADECIMAL',              desc: 'KP_HEXADECIMAL'};
-keycodes[0x00DE] = {id: 'RESERVED-222',                name: 'RESERVED-222',                desc: 'RESERVED-222(0xDE)'};
-keycodes[0x00DF] = {id: 'RESERVED-223',                name: 'RESERVED-223',                desc: 'RESERVED-223(0xDF)'};
+*/
+
+keycodes[0x00A5] = {id: 'PWR ',                        name: 'Sys Power',                   desc: 'System Power'};
+keycodes[0x00A6] = {id: 'SLEP',                        name: 'Sys Sleep',                   desc: 'System Sleep'};
+keycodes[0x00A7] = {id: 'WAKE',                        name: 'Sys Wake',                    desc: 'System Wake'};
+keycodes[0x00A8] = {id: 'MUTE',                        name: 'Mute',                        desc: 'Audio Mute'};
+keycodes[0x00A9] = {id: 'VOLU',                        name: 'Vol Up',                      desc: 'Audio Vol Up'};
+keycodes[0x00AA] = {id: 'VOLD',                        name: 'Vol Down',                    desc: 'Audio Vol Down'};
+keycodes[0x00AB] = {id: 'MNXT',                        name: 'Next Track',                  desc: 'Next Track'};
+keycodes[0x00AC] = {id: 'MPRV',                        name: 'Prev Track',                  desc: 'Previous Track'};
+keycodes[0x00AD] = {id: 'MFFD',                        name: 'Fast Forward',                desc: 'Media Fast Forward(Mac)'};
+keycodes[0x00AE] = {id: 'MRWD',                        name: 'Rewind',                      desc: 'Media Rewind(Mac)'};
+keycodes[0x00AF] = {id: 'MSTP',                        name: 'Stop',                        desc: 'Media Stop'};
+keycodes[0x00B0] = {id: 'MPLY',                        name: 'Play Pause',                  desc: 'Play Pause'};
+keycodes[0x00B1] = {id: 'EJCT',                        name: 'Eject',                       desc: 'Media Eject'};
+keycodes[0x00B2] = {id: 'MSEL',                        name: 'Media Select',                desc: 'Media Select'};
+keycodes[0x00B3] = {id: 'MAIL',                        name: 'Mail',                        desc: 'Mail'};
+keycodes[0x00B4] = {id: 'CALC',                        name: 'Calc',                        desc: 'Calculator'};
+keycodes[0x00B5] = {id: 'MYCM',                        name: 'My Computer',                 desc: 'My Computer'};
+keycodes[0x00B6] = {id: 'WSCH',                        name: 'Web Search',                  desc: 'WWW Search'};
+keycodes[0x00B7] = {id: 'WHOM',                        name: 'Web Home',                    desc: 'WWW Home'};
+keycodes[0x00B8] = {id: 'WBAK',                        name: 'Web Back',                    desc: 'WWW Back'};
+keycodes[0x00B9] = {id: 'WFWD',                        name: 'Web Forward',                 desc: 'WWW Forward'};
+keycodes[0x00BA] = {id: 'WSTP',                        name: 'Web Stop',                    desc: 'WWW Stop'};
+keycodes[0x00BB] = {id: 'WREF',                        name: 'Web Refresh',                 desc: 'WWW Refresh'};
+keycodes[0x00BC] = {id: 'WFAV',                        name: 'Web Favorites',               desc: 'WWW Favorites'};
+keycodes[0x00BD] = {id: 'BRTI',                        name: 'Brightness Inc',              desc: 'Brightness Increment'};
+keycodes[0x00BE] = {id: 'BRTD',                        name: 'Brightness Dec',              desc: 'Brightness Decrement'};
+keycodes[0x00BF] = {id: 'BTLD',                        name: 'Bootloader',                  desc: 'Start Bootloader'    };
+
+keycodes[0x00C0] = {id: '_C0_',                        name: '0xC0',                        desc: 'Reserved 0xC0'};
+keycodes[0x00C1] = {id: '_C1_',                        name: '0xC1',                        desc: 'Reserved 0xC1'};
+keycodes[0x00C2] = {id: '_C2_',                        name: '0xC2',                        desc: 'Reserved 0xC2'};
+keycodes[0x00C3] = {id: '_C3_',                        name: '0xC3',                        desc: 'Reserved 0xC3'};
+keycodes[0x00C4] = {id: '_C4_',                        name: '0xC4',                        desc: 'Reserved 0xC4'};
+keycodes[0x00C5] = {id: '_C5_',                        name: '0xC5',                        desc: 'Reserved 0xC5'};
+keycodes[0x00C6] = {id: '_C6_',                        name: '0xC6',                        desc: 'Reserved 0xC6'};
+keycodes[0x00C7] = {id: '_C7_',                        name: '0xC7',                        desc: 'Reserved 0xC7'};
+keycodes[0x00C8] = {id: '_C8_',                        name: '0xC8',                        desc: 'Reserved 0xC8'};
+keycodes[0x00C9] = {id: '_C9_',                        name: '0xC9',                        desc: 'Reserved 0xC9'};
+keycodes[0x00CA] = {id: '_CA_',                        name: '0xCA',                        desc: 'Reserved 0xCA'};
+keycodes[0x00CB] = {id: '_CB_',                        name: '0xCB',                        desc: 'Reserved 0xCB'};
+keycodes[0x00CC] = {id: '_CC_',                        name: '0xCC',                        desc: 'Reserved 0xCC'};
+keycodes[0x00CD] = {id: '_CD_',                        name: '0xCD',                        desc: 'Reserved 0xCD'};
+keycodes[0x00CE] = {id: '_CE_',                        name: '0xCE',                        desc: 'Reserved 0xCE'};
+keycodes[0x00CF] = {id: '_CF_',                        name: '0xCF',                        desc: 'Reserved 0xCF'};
+keycodes[0x00D0] = {id: '_D0_',                        name: '0xD0',                        desc: 'Reserved 0xD0'};
+keycodes[0x00D1] = {id: '_D1_',                        name: '0xD1',                        desc: 'Reserved 0xD1'};
+keycodes[0x00D2] = {id: '_D2_',                        name: '0xD2',                        desc: 'Reserved 0xD2'};
+keycodes[0x00D3] = {id: '_D3_',                        name: '0xD3',                        desc: 'Reserved 0xD3'};
+keycodes[0x00D4] = {id: '_D4_',                        name: '0xD4',                        desc: 'Reserved 0xD4'};
+keycodes[0x00D5] = {id: '_D5_',                        name: '0xD5',                        desc: 'Reserved 0xD5'};
+keycodes[0x00D6] = {id: '_D6_',                        name: '0xD6',                        desc: 'Reserved 0xD6'};
+keycodes[0x00D7] = {id: '_D7_',                        name: '0xD7',                        desc: 'Reserved 0xD7'};
+keycodes[0x00D8] = {id: '_D8_',                        name: '0xD8',                        desc: 'Reserved 0xD8'};
+keycodes[0x00D9] = {id: '_D9_',                        name: '0xD9',                        desc: 'Reserved 0xD9'};
+keycodes[0x00DA] = {id: '_DA_',                        name: '0xDA',                        desc: 'Reserved 0xDA'};
+keycodes[0x00DB] = {id: '_DB_',                        name: '0xDB',                        desc: 'Reserved 0xDB'};
+keycodes[0x00DC] = {id: '_DC_',                        name: '0xDC',                        desc: 'Reserved 0xDC'};
+keycodes[0x00DD] = {id: '_DD_',                        name: '0xDD',                        desc: 'Reserved 0xDD'};
+keycodes[0x00DE] = {id: '_DE_',                        name: '0xDE',                        desc: 'Reserved 0xDE'};
+keycodes[0x00DF] = {id: '_DF_',                        name: '0xDF',                        desc: 'Reserved 0xDF'};
+
 keycodes[0x00E0] = {id: 'LCTL',                        name: 'LCtrl',                       desc: 'Left Control'};
 keycodes[0x00E1] = {id: 'LSFT',                        name: 'LShift',                      desc: 'Left Shift'};
 keycodes[0x00E2] = {id: 'LALT',                        name: 'LAlt',                        desc: 'Left Alt(\u2325)'};
@@ -620,30 +686,32 @@ keycodes[0x00E4] = {id: 'RCTL',                        name: 'RCtrl',           
 keycodes[0x00E5] = {id: 'RSFT',                        name: 'RShift',                      desc: 'Right Shift'};
 keycodes[0x00E6] = {id: 'RALT',                        name: 'RAlt',                        desc: 'Right Alt(\u2325)'};
 keycodes[0x00E7] = {id: 'RGUI',                        name: 'RGui',                        desc: 'Right Windows(\u2318)'};
-keycodes[0x00E8] = {id: 'RESERVED-232',                name: 'RESERVED-232',                desc: 'RESERVED-232(0xE8)'};
-keycodes[0x00E9] = {id: 'RESERVED-233',                name: 'RESERVED-233',                desc: 'RESERVED-233(0xE9)'};
-keycodes[0x00EA] = {id: 'RESERVED-234',                name: 'RESERVED-234',                desc: 'RESERVED-234(0xEA)'};
-keycodes[0x00EB] = {id: 'RESERVED-235',                name: 'RESERVED-235',                desc: 'RESERVED-235(0xEB)'};
-keycodes[0x00EC] = {id: 'RESERVED-236',                name: 'RESERVED-236',                desc: 'RESERVED-236(0xEC)'};
-keycodes[0x00ED] = {id: 'RESERVED-237',                name: 'RESERVED-237',                desc: 'RESERVED-237(0xED)'};
-keycodes[0x00EE] = {id: 'RESERVED-238',                name: 'RESERVED-238',                desc: 'RESERVED-238(0xEE)'};
-keycodes[0x00EF] = {id: 'RESERVED-239',                name: 'RESERVED-239',                desc: 'RESERVED-239(0xEF)'};
-keycodes[0x00F0] = {id: 'RESERVED-240',                name: 'RESERVED-240',                desc: 'RESERVED-240(0xF0)'};
-keycodes[0x00F1] = {id: 'RESERVED-241',                name: 'RESERVED-241',                desc: 'RESERVED-241(0xF1)'};
-keycodes[0x00F2] = {id: 'RESERVED-242',                name: 'RESERVED-242',                desc: 'RESERVED-242(0xF2)'};
-keycodes[0x00F3] = {id: 'RESERVED-243',                name: 'RESERVED-243',                desc: 'RESERVED-243(0xF3)'};
-keycodes[0x00F4] = {id: 'RESERVED-244',                name: 'RESERVED-244',                desc: 'RESERVED-244(0xF4)'};
-keycodes[0x00F5] = {id: 'RESERVED-245',                name: 'RESERVED-245',                desc: 'RESERVED-245(0xF5)'};
-keycodes[0x00F6] = {id: 'RESERVED-246',                name: 'RESERVED-246',                desc: 'RESERVED-246(0xF6)'};
-keycodes[0x00F7] = {id: 'RESERVED-247',                name: 'RESERVED-247',                desc: 'RESERVED-247(0xF7)'};
-keycodes[0x00F8] = {id: 'RESERVED-248',                name: 'RESERVED-248',                desc: 'RESERVED-248(0xF8)'};
-keycodes[0x00F9] = {id: 'RESERVED-249',                name: 'RESERVED-249',                desc: 'RESERVED-249(0xF9)'};
-keycodes[0x00FA] = {id: 'RESERVED-250',                name: 'RESERVED-250',                desc: 'RESERVED-250(0xFA)'};
-keycodes[0x00FB] = {id: 'RESERVED-251',                name: 'RESERVED-251',                desc: 'RESERVED-251(0xFB)'};
-keycodes[0x00FC] = {id: 'RESERVED-252',                name: 'RESERVED-252',                desc: 'RESERVED-252(0xFC)'};
-keycodes[0x00FD] = {id: 'RESERVED-253',                name: 'RESERVED-253',                desc: 'RESERVED-253(0xFD)'};
-keycodes[0x00FE] = {id: 'RESERVED-254',                name: 'RESERVED-254',                desc: 'RESERVED-254(0xFE)'};
-keycodes[0x00FF] = {id: 'RESERVED-255',                name: 'RESERVED-255',                desc: 'RESERVED-255(0xFF)'};
+
+keycodes[0x00E8] = {id: '_E8_',                        name: '0xE8',                        desc: 'Reserved 0xE8'};
+keycodes[0x00E9] = {id: '_E9_',                        name: '0xE9',                        desc: 'Reserved 0xE9'};
+keycodes[0x00EA] = {id: '_EA_',                        name: '0xEA',                        desc: 'Reserved 0xEA'};
+keycodes[0x00EB] = {id: '_EB_',                        name: '0xEB',                        desc: 'Reserved 0xEB'};
+keycodes[0x00EC] = {id: '_EC_',                        name: '0xEC',                        desc: 'Reserved 0xEC'};
+keycodes[0x00ED] = {id: '_ED_',                        name: '0xED',                        desc: 'Reserved 0xED'};
+keycodes[0x00EE] = {id: '_EE_',                        name: '0xEE',                        desc: 'Reserved 0xEE'};
+keycodes[0x00EF] = {id: '_EF_',                        name: '0xEF',                        desc: 'Reserved 0xEF'};
+
+keycodes[0x00F0] = {id: 'MS_U',                        name: 'Mouse Up',                    desc: 'Mouse UP'};
+keycodes[0x00F1] = {id: 'MS_D',                        name: 'Mouse down',                  desc: 'Mouse Down'};
+keycodes[0x00F2] = {id: 'MS_L',                        name: 'Mouse left',                  desc: 'Mouse Left'};
+keycodes[0x00F3] = {id: 'MS_R',                        name: 'Mouse right',                 desc: 'Mouse Right'};
+keycodes[0x00F4] = {id: 'BTN1',                        name: 'Mouse Btn1',                  desc: 'Mouse Button1'};
+keycodes[0x00F5] = {id: 'BTN2',                        name: 'Mouse Btn2',                  desc: 'Mouse Button2'};
+keycodes[0x00F6] = {id: 'BTN3',                        name: 'Mouse Btn3',                  desc: 'Mouse Button3'};
+keycodes[0x00F7] = {id: 'BTN4',                        name: 'Mouse Btn4',                  desc: 'Mouse Button4'};
+keycodes[0x00F8] = {id: 'BTN5',                        name: 'Mouse Btn5',                  desc: 'Mouse Button5'};
+keycodes[0x00F9] = {id: 'WH_U',                        name: 'Wheel Up',                    desc: 'Wheel Up'};
+keycodes[0x00FA] = {id: 'WH_D',                        name: 'Wheel Down',                  desc: 'Wheel Down'};
+keycodes[0x00FB] = {id: 'WH_L',                        name: 'Wheel Left',                  desc: 'Wheel Left'};
+keycodes[0x00FC] = {id: 'WH_R',                        name: 'Wheel Right',                 desc: 'Wheel Right'};
+keycodes[0x00FD] = {id: 'ACL0',                        name: 'Mouse Slow',                  desc: 'Mouse Slow'};
+keycodes[0x00FE] = {id: 'ACL1',                        name: 'Mouse Medium',                desc: 'Mouse Medium'};
+keycodes[0x00FF] = {id: 'ACL2',                        name: 'Mouse Fast',                  desc: 'Mouse Fast'};
 
 
 /**********************************************************************
@@ -666,7 +734,7 @@ consumer_codes[0x0B5] = {id: 'MNXT',                        name: 'Next Track', 
 consumer_codes[0x0B6] = {id: 'MPRV',                        name: 'Prev Track',                  desc: 'Previous Track'};
 consumer_codes[0x0B7] = {id: 'MSTP',                        name: 'Stop',                        desc: 'Media Stop'};
 consumer_codes[0x0CD] = {id: 'MPLY',                        name: 'Play Pause',                  desc: 'Play Pause'};
-consumer_codes[0x083] = {id: 'MSEL',                        name: 'Media Select',                desc: 'Media Select'};
+consumer_codes[0x183] = {id: 'MSEL',                        name: 'Media Select',                desc: 'Media Select'};
 consumer_codes[0x0CC] = {id: 'EJCT',                        name: 'Eject',                       desc: 'Media Eject'};
 consumer_codes[0x18A] = {id: 'MAIL',                        name: 'Mail',                        desc: 'Mail'};
 consumer_codes[0x192] = {id: 'CALC',                        name: 'Calc',                        desc: 'Calculator'};
@@ -750,3 +818,10 @@ on_codes = [];
 on_codes[0x1] = { id: 0x1, name: "On Press", desc: "On Press" };
 on_codes[0x2] = { id: 0x1, name: "On Release", desc: "On Release" };
 on_codes[0x3] = { id: 0x1, name: "On Both", desc: "On Press and Release" };
+
+
+/**********************************************************************
+ * Commands
+ **********************************************************************/
+command_ids = [];
+command_ids[0] = { id: 'BTLD', name: 'BTLD', desc: 'Start Bootloader' };

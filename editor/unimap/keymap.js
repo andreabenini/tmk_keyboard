@@ -115,7 +115,7 @@ function source_output(keymaps) {
         for (var j in keymaps[i]) {
             output += "        { ";
             for (var k in keymaps[i][j]) {
-                output += '0x' + ('0' + keymaps[i][j][k].toString(16)).substr(-2);
+                output += '0x' + ('000' + keymaps[i][j][k].toString(16)).substr(-4);
                 output += ',';
             }
             output += " },\n";
@@ -226,7 +226,7 @@ function hex_split_firmware(hexstr, keymap_addr, keymap_size) {
     var keymap_raw = [];
     var out = line_before;
     var addr_offset = 0;
-    var lines = hexstr.split("\n");
+    var lines = hexstr.split(/\r?\n/);
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i].trim();
         if (line.substring(0,1) != ":") break;
