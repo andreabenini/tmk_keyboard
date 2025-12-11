@@ -60,7 +60,7 @@ const uint8_t PROGMEM unimap_trans[MATRIX_ROWS][MATRIX_COLS] = {
     { UNIMAP_F21,       UNIMAP_F22,         UNIMAP_F23,         UNIMAP_F24,     UNIMAP_F19,         UNIMAP_F23,         UNIMAP_F15,     UNIMAP_F17,            /* 70-77 */
       UNIMAP_F13,       UNIMAP_F14,         UNIMAP_F16,         UNIMAP_F22,     UNIMAP_F18,         UNIMAP_F20,         UNIMAP_F21,     UNIMAP_MUTE         }, /* 78-7F */
     { UNIMAP_VOLU,      UNIMAP_VOLD,        UNIMAP_NO,          UNIMAP_NO,      UNIMAP_NO,          UNIMAP_KP_COMMA,    UNIMAP_NO,      UNIMAP_RO,             /* 80-87 */
-      UNIMAP_KANA,      UNIMAP_JYEN,        UNIMAP_HENK,        UNIMAP_MHEN,    UNIMAP_NO,          UNIMAP_NO,          UNIMAP_NO,      UNIMAP_NO           }, /* 88-8F */
+      UNIMAP_KANA,      UNIMAP_JYEN,        UNIMAP_HENK,        UNIMAP_MHEN,    UNIMAP_KP_COMMA,    UNIMAP_NO,          UNIMAP_NO,      UNIMAP_NO           }, /* 88-8F */
     { UNIMAP_HENK,      UNIMAP_MHEN,        UNIMAP_NO,          UNIMAP_NO,      UNIMAP_NO,          UNIMAP_NO,          UNIMAP_NO,      UNIMAP_NO,             /* 90-97 */
       UNIMAP_NO,        UNIMAP_NO,          UNIMAP_NO,          UNIMAP_NO,      UNIMAP_NO,          UNIMAP_NO,          UNIMAP_NO,      UNIMAP_NO           }, /* 98-9F */
     { UNIMAP_NO,        UNIMAP_NO,          UNIMAP_NO,          UNIMAP_NO,      UNIMAP_NO,          UNIMAP_NO,          UNIMAP_NO,      UNIMAP_NO,             /* A0-A7 */
@@ -82,8 +82,8 @@ const uint8_t PROGMEM unimap_trans[MATRIX_ROWS][MATRIX_COLS] = {
  *  HID Keyboard usage      Unimap code         Note
  *  -------------------------------------------------------------------------------
  *  0x66 Power              UNIMAP_F24
- *  0x80 LANG1              UNIMAP_HENK         Korean Hangul/English
- *  0x81 LANG2              UNIMAP_MHEN         Korean Hanja conversion
+ *  0x90 LANG1              UNIMAP_HENK         Korean Hangul/English
+ *  0x91 LANG2              UNIMAP_MHEN         Korean Hanja conversion
  *
  *  0x78 Stop               UNIMAP_F13          Sun keyboard
  *  0x79 Again              UNIMAP_F14          Sun keyboard
@@ -97,8 +97,13 @@ const uint8_t PROGMEM unimap_trans[MATRIX_ROWS][MATRIX_COLS] = {
  *  0x7B Cut                UNIMAP_F22          Sun keyboard
  *  0x75 Help               UNIMAP_F23          Sun keyboard
  *  ???? -----              UNIMAP_JYEN         Sun keyboard Blank(Unix layout) RO? RCTRL?
+ *      https://github.com/tmk/tmk_keyboard/wiki/Sun-Keyboard-Protocol#usb-hid-usages-for-sun
+ *  0x9E Return?                                Sun keyboard ???
+ *      https://github.com/tmk/tmk_keyboard/wiki/Sun-Keyboard-Protocol#keyboard-return
  *
- *  https://github.com/tmk/tmk_keyboard/wiki/Sun-Keyboard-Protocol#usb-hid-usages-for-sun
+ *  0x8C INTL6              UNIMAP_KP_COMMA     PC98 Keypad ,
+ *      https://github.com/tmk/tmk_keyboard/wiki/USB:-HID-Usage-Table#note-21
+ *
  */
 
 #endif
